@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel=stylesheet type="text/css" href="/house.css" title="House">
+<script>
+
+var countIoShown = 0;
+
+function saveConfig () {
+
+    var form = document.forms;
+    var newconfig = new Object();
+    newconfig.orvibo = new Object();
+    newconfig.orvibo.plugs = new Array();
+
+    for (var i = 0; i < countIoShown; ++i) {
+
+        var prefix = 'orvibo_'+i+'_';
+        var plug = new Object();
+        plug.name = form.iolistform[prefix+'name'].value;
+        plug.address = parseInt(form.iolistform[prefix+'address'].value);
+        plug.description = form.iolistform[prefix+'desc'].value;
+        newconfig.orvibo.plugs[i] = plug;
+    }
+
+    var command = new XMLHttpRequest();
+    command.open("POST", "/orvibo/config");
+    command.setRequestHeader('Content-Type', 'application/json');
+    command.onreadystatechange = function () {
+        if (command.readyState === 4 && command.status !== 200) {
+            window.alert ('Operation failed (error '+command.status+')!');
+        }
+    }
+    command.send(JSON.stringify(newconfig));
+}
+
+function showPlug (name, address, description) {
+
+    var outer = document.createElement("tr");
+
+    var iolist = document.getElementsByClassName ('iolist')[0];
+    var prefix = 'orvibo_'+countIoShown+'_';
+    var inner = document.createElement("td");
+    var entry = document.createElement("input");
+    entry.type = 'text';
+    entry.name = prefix+'name';
+    entry.value = name;
+    entry.placeholder = 'Name';
+    inner.appendChild(entry);
+    outer.appendChild(inner);
+
+    inner = document.createElement("td");
+    entry = document.createElement("input");
+    entry.type = 'text';
+    entry.name = prefix+'address';
+    entry.min = 1;
+    entry.max = 99;
+    entry.value = address;
+    entry.placeholder = 'MAC Address';
+    entry.inputmode = 'numeric';
+    inner.appendChild(entry);
+    outer.appendChild(inner);
+
+    inner = document.createElement("td");
+    entry = document.createElement("input");
+    entry.type = 'text';
+    entry.name = prefix+'desc';
+    entry.placeholder = 'Text';
+    if (description)
+        entry.value = description;
+    else
+        entry.value = '';
+    inner.appendChild(entry);
+    outer.appendChild(inner);
+
+    iolist.appendChild(outer);
+    countIoShown += 1;
+}
+
+function addConfig () {
+    showPlug ('', '', '');
+}
+
+function orviboShowConfig (response) {
+   var iolist = document.getElementsByClassName ('iolist')[0];
+   var plugs = response.orvibo.plugs;
+   for (var i = 0; i < plugs.length; i++) {
+      var plug = plugs[i];
+      if (!plug.description) plug.description = '';
+      showPlug (plug.name, plug.address, plug.description);
+   }
+}
+
+function orviboConfig () {
+    var command = new XMLHttpRequest();
+    command.open("GET", "/orvibo/config");
+    command.onreadystatechange = function () {
+        if (command.readyState === 4 && command.status === 200) {
+            orviboShowConfig (JSON.parse(command.responseText));
+        }
+    }
+    command.send(null);
+}
+
+function orviboShowStatus (response) {
+    document.getElementById('portal').href = 'http://'+response.proxy+'/index.html';
+}
+
+function orviboStatus () {
+    var command = new XMLHttpRequest();
+    command.open("GET", "/orvibo/status");
+    command.onreadystatechange = function () {
+        if (command.readyState === 4 && command.status === 200) {
+            orviboShowStatus (JSON.parse(command.responseText));
+        }
+    }
+    command.send(null);
+}
+
+window.onload = function() {
+   orviboConfig();
+   orviboStatus();
+};
+</script>
+<head>
+   <title>Orvibo Plugs</title>
+</head>
+<body>
+   <table class="housetopcontainer">
+   <tr><td>
+   <table class="housetop">
+   <tr>
+   <td><a id="portal" href="/index.html">Portal</a></td>
+   <td><a href="/orvibo/index.html">Orvibo</a></td>
+   <td><a href="/orvibo/events.html">Events</a></td>
+   <td><span>Config</span></td>
+   </tr>
+   </table>
+   </td></tr>
+   </table>
+   <form name="iolistform">
+   <table class="houselargetable iolist">
+      <tr>
+         <th>NAME</th>
+         <th>ADDRESS</th>
+         <th>DESCRIPTION</th>
+      </tr>
+   </table>
+   </form>
+   <div class="housebuttons">
+      <button class="actionbutton" onclick="addConfig()">Add</button>
+      <button class="actionbutton" onclick="saveConfig()">Save</button>
+   </div>
+</body>
+</html>
+

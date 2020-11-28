@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel=stylesheet type="text/css" href="/house.css" title="House">
+<script>
+function orviboShowStatus (response) {
+
+    document.getElementById('portal').href = 'http://'+response.proxy+'/index.html';
+
+    var state = response.control.status;
+    for (const [key, value] of Object.entries(state)) {
+        var state = document.getElementById ('state-'+key);
+        var button = document.getElementById ('button-'+key);
+        if (value.state) {
+            state.innerHTML = 'ON';
+            button.innerHTML = 'OFF';
+            button.controlState = 'off';
+        } else {
+            state.innerHTML = 'OFF';
+            button.innerHTML = 'ON';
+            button.controlState = 'on';
+        }
+        button.disabled = false;
+    }
+}
+
+function orviboStatus () {
+    var command = new XMLHttpRequest();
+    command.open("GET", "/orvibo/status");
+    command.onreadystatechange = function () {
+        if (command.readyState === 4 && command.status === 200) {
+            orviboShowStatus (JSON.parse(command.responseText));
+        }
+    }
+    command.send(null);
+}
+
+function controlClick () {
+    var point = this.controlName;
+    var state = this.controlState;
+    var command = new XMLHttpRequest();
+    command.open("GET", "/orvibo/set?point="+point+"&state="+state);
+    command.onreadystatechange = function () {
+        if (command.readyState === 4 && command.status === 200) {
+            orviboShowStatus (JSON.parse(command.responseText));
+        }
+    }
+    command.send(null);
+}
+
+window.onload = function() {
+
+   function orviboShowConfig (response) {
+      var iolist = document.getElementsByClassName ('iolist')[0];
+      var points = response.orvibo.points;
+      for (var i = 0; i < points.length; i++) {
+           var point = points[i];
+           var outer = document.createElement("tr");
+
+           var inner = document.createElement("td");
+           var label = document.createElement("span");
+           label.innerHTML = point.name;
+           inner.appendChild(label);
+           outer.appendChild(inner);
+
+           inner = document.createElement("td");
+           label = document.createElement("span");
+           label.innerHTML = '(wait)';
+           label.id = 'state-'+point.name;
+           inner.appendChild(label);
+           outer.appendChild(inner);
+
+           inner = document.createElement("td");
+           var button = document.createElement("button");
+           button.innerHTML = '(wait)';
+           button.disabled = true;
+           button.id = 'button-'+point.name;
+           button.onclick = controlClick;
+           button.controlName = point.name;
+           button.controlOn = point.on;
+           inner.appendChild(button);
+           outer.appendChild(inner);
+
+           inner = document.createElement("td");
+           label = document.createElement("span");
+           if (point.description)
+               label.innerHTML = point.description;
+           else
+               label.innerHTML = '';
+           inner.appendChild(label);
+           outer.appendChild(inner);
+
+           iolist.appendChild(outer);
+       }
+   }
+
+   function orviboConfig () {
+       var command = new XMLHttpRequest();
+       command.open("GET", "/orvibo/config");
+       command.onreadystatechange = function () {
+           if (command.readyState === 4 && command.status === 200) {
+               orviboShowConfig (JSON.parse(command.responseText));
+               orviboStatus();
+               setInterval (orviboStatus, 1000);
+           }
+       }
+       command.send(null);
+   }
+   orviboConfig();
+};
+</script>
+<head>
+   <title>Orvibo Plugs</title>
+</head>
+<body>
+   <table class="housetopcontainer">
+   <tr><td>
+   <table class="housetop">
+   <tr>
+   <td><a id="portal" href="/index.html">Portal</a></td>
+   <td><span>Orvibo Plugs</span></td>
+   <td><a href="/orvibo/events.html">Events</a></td>
+   <td><a href="/orvibo/config.html">Config</a></td>
+   </tr>
+   </table>
+   </td></tr>
+   </table>
+   <table class="housewidetable iolist" border="0">
+      <tr>
+         <th width="14%">NAME</th>
+         <th width="10%">STATE</th>
+         <th width="10%">CONTROL</th>
+         <th width="52%">DESCRIPTION</th>
+      </tr>
+   </table>
+</body>
+</html>
+
