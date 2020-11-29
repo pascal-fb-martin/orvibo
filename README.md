@@ -1,7 +1,9 @@
 # orvibo
-A House web service to read and control Orvibo WiFi plugs
+A House web service to read and control Orvibo S20 WiFi plugs
 ## Overview
 This is a web server to give access to Ovibo WiFi electric plugs. This server can sense the current status and control the state of each plug. The web API is meant to be compatible with the House control API (e.g. the same web API as [houserelays](https://github.com/pascal-fb-martin/houserelays)).
+## Warning
+The Orvibo S20 is a discontinued model. Newer Orvibo models do not use the same protocol and this program is not compatible with them.
 ## Installation
 * Install the OpenSSL development package(s).
 * Install [echttp](https://github.com/pascal-fb-martin/echttp).
