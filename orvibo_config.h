@@ -21,7 +21,6 @@
 
 const char *orvibo_config_load (int argc, const char **argv);
 
-int orvibo_config_file (void);
 int orvibo_config_size (void);
 
 const char *orvibo_config_update (const char *text);

@@ -11,16 +11,20 @@ function orviboShowStatus (response) {
     for (const [key, value] of Object.entries(state)) {
         var state = document.getElementById ('state-'+key);
         var button = document.getElementById ('button-'+key);
-        if (value.state) {
+        if (value.state == 'on') {
             state.innerHTML = 'ON';
             button.innerHTML = 'OFF';
             button.controlState = 'off';
-        } else {
+            button.disabled = false;
+        } else if (value.state == 'off') {
             state.innerHTML = 'OFF';
             button.innerHTML = 'ON';
             button.controlState = 'on';
+            button.disabled = false;
+        } else {
+            state.innerHTML = value.state;
+            button.disabled = true;
         }
-        button.disabled = false;
     }
 }
 

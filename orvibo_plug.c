@@ -39,6 +39,10 @@
  *
  *    Return the name of an orvibo plug.
  *
+ * const char *orvibo_plug_failure (int point);
+ *
+ *    Return a string describing the failure, or a null pointer if healthy.
+ *
  * int    orvibo_plug_commanded (int point);
  * time_t orvibo_plug_deadline (int point);
  *
@@ -86,6 +90,7 @@ struct PlugMap {
     char description[256];
     char macaddress[16];
     struct sockaddr_in ipaddress;
+    time_t detected;
     int status;
     int commanded;
     time_t deadline;
@@ -115,6 +120,12 @@ int orvibo_plug_commanded (int point) {
 time_t orvibo_plug_deadline (int point) {
     if (point < 0 || point > PlugsCount) return 0;
     return Plugs[point].deadline;
+}
+
+const char *orvibo_plug_failure (int point) {
+    if (point < 0 || point > PlugsCount) return 0;
+    if (!Plugs[point].detected) return "silent";
+    return 0;
 }
 
 int orvibo_plug_get (int point) {
@@ -241,7 +252,7 @@ int orvibo_plug_set (int point, int state, int pulse) {
 
     // Only send a command if we detected the device on the network.
     //
-    if (Plugs[point].ipaddress.sin_port) {
+    if (Plugs[point].detected) {
         orvibo_plug_subscribe (point);
         orvibo_plug_control (point, state);
     }
@@ -256,13 +267,16 @@ void orvibo_plug_periodic (time_t now) {
     LastCall = now;
 
     for (i = 0; i < PlugsCount; ++i) {
+        // If we did not detect a plug for 3 periods, consider it failed.
+        if (Plugs[i].detected < now - 90) Plugs[i].detected = 0;
+
         if (Plugs[i].deadline > 0 && now >= Plugs[i].deadline) {
             houselog_event ("ORVIBO", Plugs[i].name, "RESET", "END OF PULSE");
             Plugs[i].commanded = 0;
             Plugs[i].deadline = 0;
         }
         if (Plugs[i].status != Plugs[i].commanded) {
-            if (Plugs[i].ipaddress.sin_port) {
+            if (Plugs[i].detected) {
                 const char *state = Plugs[i].commanded?"on":"off";
                 houselog_event ("ORVIBO", Plugs[i].name, "RETRY", "%s", state);
                 orvibo_plug_subscribe (i);
@@ -283,7 +297,7 @@ const char *orvibo_plug_refresh (void) {
         Plugs[i].macaddress[0] = 0;
         Plugs[i].description[0] = 0;
         Plugs[i].deadline = 0;
-        Plugs[i].ipaddress.sin_port = 0;
+        Plugs[i].detected = 0;
     }
     PlugsCount = 0;
 
@@ -431,6 +445,7 @@ static void orvibo_plug_receive (int fd, int mode) {
             }
             memcpy (&(Plugs[plug].ipaddress),
                     &addr, sizeof(Plugs[plug].ipaddress));
+            Plugs[plug].detected = time(0);
         }
     }
 }

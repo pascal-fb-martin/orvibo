@@ -29,6 +29,8 @@ const char *orvibo_plug_name (int point);
 
 const char *orvibo_plug_live_config (char *buffer, int size);
 
+const char *orvibo_plug_failure (int point);
+
 int    orvibo_plug_commanded (int point);
 time_t orvibo_plug_deadline  (int point);
 int    orvibo_plug_get       (int point);

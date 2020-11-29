@@ -27,11 +27,9 @@
  *    Load the configuration from the specified config option, or else
  *    from the default config file.
  *
- * int orvibo_config_file (void);
  * int orvibo_config_size (void);
  *
- *    Return a file descriptor (and the size) of the configuration file
- *    being used.
+ *    Return the size of the configuration JSON text currently used.
  *
  * const char *orvibo_config_update (const char *text);
  *
@@ -133,10 +131,6 @@ const char *orvibo_config_update (const char *text) {
         close (fd);
     }
     return 0;
-}
-
-int orvibo_config_file (void) {
-    return open(ConfigFile, O_RDONLY);
 }
 
 int orvibo_config_size (void) {

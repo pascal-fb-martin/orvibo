@@ -90,10 +90,12 @@ static const char *orvibo_status (const char *method, const char *uri,
     for (i = 0; i < count; ++i) {
         time_t pulsed = orvibo_plug_deadline(i);
         const char *name = orvibo_plug_name(i);
+        const char *status = orvibo_plug_failure(i);
+        if (!status) status = orvibo_plug_get(i)?"on":"off";
         const char *commanded = orvibo_plug_commanded(i)?"on":"off";
 
         int point = echttp_json_add_object (context, container, name);
-        echttp_json_add_integer (context, point, "state", orvibo_plug_get(i));
+        echttp_json_add_string (context, point, "state", status);
         echttp_json_add_string (context, point, "command", commanded);
         if (pulsed)
             echttp_json_add_integer (context, point, "pulse", (int)pulsed);
