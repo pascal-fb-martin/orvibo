@@ -260,14 +260,20 @@ int orvibo_plug_set (int point, int state, int pulse) {
 
 void orvibo_plug_periodic (time_t now) {
 
-    static time_t LastCall = 0;
+    static time_t LastRetry = 0;
+    static time_t LastSense = 0;
     int i;
 
-    if (now < LastCall + 30) return;
-    LastCall = now;
+    if (now >= LastSense + 30) {
+        LastSense = now;
+        orvibo_plug_sense ();
+    }
+
+    if (now < LastRetry + 5) return;
+    LastRetry = now;
 
     for (i = 0; i < PlugsCount; ++i) {
-        // If we did not detect a plug for 3 periods, consider it failed.
+        // If we did not detect a plug for 3 senses, consider it failed.
         if (Plugs[i].detected < now - 90) Plugs[i].detected = 0;
 
         if (Plugs[i].deadline > 0 && now >= Plugs[i].deadline) {
@@ -278,13 +284,12 @@ void orvibo_plug_periodic (time_t now) {
         if (Plugs[i].status != Plugs[i].commanded) {
             if (Plugs[i].detected) {
                 const char *state = Plugs[i].commanded?"on":"off";
-                houselog_event ("ORVIBO", Plugs[i].name, "RETRY", "%s", state);
+                houselog_event ("ORVIBO", Plugs[i].name, "RETRY", state);
                 orvibo_plug_subscribe (i);
                 orvibo_plug_control (i, Plugs[i].commanded);
             }
         }
     }
-    orvibo_plug_sense ();
 }
 
 const char *orvibo_plug_refresh (void) {
