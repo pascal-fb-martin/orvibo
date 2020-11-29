@@ -274,7 +274,7 @@ void orvibo_plug_periodic (time_t now) {
 
     for (i = 0; i < PlugsCount; ++i) {
         // If we did not detect a plug for 3 senses, consider it failed.
-        if (Plugs[i].detected < now - 90) {
+        if (Plugs[i].detected > 0 && Plugs[i].detected < now - 90) {
             houselog_event ("DEVICE", Plugs[i].name, "SILENT",
                             "MAC ADDRESS %s", Plugs[i].macaddress);
             Plugs[i].detected = 0;
