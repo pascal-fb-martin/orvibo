@@ -218,7 +218,7 @@ int main (int argc, const char **argv) {
         houseportal_initialize (argc, argv);
         use_houseportal = 1;
     }
-    houselog_initialize ("relays", argc, argv);
+    houselog_initialize ("orvibo", argc, argv);
 
     error = orvibo_config_load (argc, argv);
     if (error) {
@@ -238,7 +238,7 @@ int main (int argc, const char **argv) {
     echttp_route_uri ("/orvibo/status", orvibo_status);
     echttp_route_uri ("/orvibo/set",    orvibo_set);
 
-    echttp_route_match ("/orvibo/config", orvibo_config);
+    echttp_route_uri ("/orvibo/config", orvibo_config);
 
     echttp_static_route ("/", "/usr/local/share/house/public");
     echttp_background (&orvibo_background);

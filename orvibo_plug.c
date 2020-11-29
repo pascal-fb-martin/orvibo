@@ -168,6 +168,7 @@ static unsigned char hex2bin(char data) {
 }
 
 static char bin2hex (unsigned char d) {
+    d &= 0x0f;
     if (d >= 0 && d <= 9) return '0' + d;
     if (d >= 10 && d <= 15) return ('a' - 10) + d;
     return '0';
@@ -271,6 +272,8 @@ void orvibo_plug_periodic (time_t now) {
 const char *orvibo_plug_refresh (void) {
 
     int i;
+    int plugs;
+
     for (i = 0; i < PlugsCount; ++i) {
         Plugs[i].name[0] = 0;
         Plugs[i].macaddress[0] = 0;
@@ -278,16 +281,16 @@ const char *orvibo_plug_refresh (void) {
         Plugs[i].deadline = 0;
         Plugs[i].ipaddress.sin_port = 0;
     }
+    PlugsCount = 0;
 
-    if (orvibo_config_size() == 0) return 0; // Empty configuration.
+    if (orvibo_config_size() > 0) {
+        plugs = orvibo_config_array (0, ".orvibo.plugs");
+        if (plugs < 0) return "cannot find plugs array";
 
-    int plugs = orvibo_config_array (0, ".orvibo.plugs");
-    if (plugs < 0) return "cannot find plugs array";
-
-    PlugsCount = orvibo_config_array_length (plugs);
-    if (PlugsCount <= 0) return "no plug found";
-    if (echttp_isdebug()) fprintf (stderr, "found %d plugs\n", PlugsCount);
-
+        PlugsCount = orvibo_config_array_length (plugs);
+        if (PlugsCount <= 0) return "no plug found";
+        if (echttp_isdebug()) fprintf (stderr, "found %d plugs\n", PlugsCount);
+    }
     PlugsSpace = PlugsCount + 32;
 
     Plugs = calloc(sizeof(struct PlugMap), PlugsSpace);
@@ -348,7 +351,7 @@ static void importmac (char *mac, const unsigned char *data, int start) {
     int i, j;
     for (i = start + 5, j = 10; i >= start; --i, j -= 2) {
         mac[j] = bin2hex(data[i] >> 4);
-        mac[j+1] = bin2hex(data[i] & 0x0f);
+        mac[j+1] = bin2hex(data[i]);
     }
     mac[12] = 0;
 }
@@ -369,7 +372,7 @@ static void orvibo_plug_dump (unsigned char *d, int l) {
     buffer[l*2] = 0;
     for (i = l-1, j = (l-1)*2; i >= 0; --i, j -= 2) {
         buffer[j] = bin2hex(d[i]>>4);
-        buffer[j+1] = bin2hex(d[i]&0x0f);
+        buffer[j+1] = bin2hex(d[i]);
     }
     fprintf (stderr, "received: %s\n", buffer);
 }
@@ -404,6 +407,7 @@ static void orvibo_plug_receive (int fd, int mode) {
         importmac (mac, data, macstart);
         plug = orvibo_plug_mac_search (mac);
         if (plug < 0 && PlugsCount < PlugsSpace) {
+            if (echttp_isdebug()) fprintf (stderr, "new device %s\n", mac);
             plug = PlugsCount++;
             snprintf (Plugs[plug].name, sizeof(Plugs[0].name), "plug%d", plug);
             snprintf (Plugs[plug].macaddress, sizeof(Plugs[0].macaddress),

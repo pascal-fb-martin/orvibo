@@ -109,12 +109,30 @@ const char *orvibo_config_update (const char *text) {
 
     int fd;
 
+    if (ConfigText) echttp_parser_free (ConfigText);
+    ConfigText = echttp_parser_string (text);
+    if (!ConfigText) {
+        ConfigTextLength = 0;
+        ConfigTokenCount = 0;
+        return "no configuration";
+    }
+    ConfigTextLength = strlen(ConfigText);
+    ConfigTokenCount = CONFIGMAXSIZE;
+    const char *error =
+        echttp_json_parse (ConfigText, ConfigParsed, &ConfigTokenCount);
+    if (error) {
+        echttp_parser_free(ConfigText);
+        ConfigText = 0;
+        ConfigTextLength = 0;
+        ConfigTokenCount = 0;
+        return error;
+    }
     fd = open (ConfigFile, O_WRONLY+O_CREAT, 0777);
     if (fd >= 0) {
         write (fd, text, ConfigTextLength);
         close (fd);
     }
-    return orvibo_config_refresh (ConfigFile);
+    return 0;
 }
 
 int orvibo_config_file (void) {

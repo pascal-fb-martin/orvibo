@@ -18,9 +18,13 @@ function saveConfig () {
         var prefix = 'orvibo_'+i+'_';
         var plug = new Object();
         plug.name = form.iolistform[prefix+'name'].value;
+        if (!plug.name) continue;
         plug.address = parseInt(form.iolistform[prefix+'address'].value);
-        plug.description = form.iolistform[prefix+'desc'].value;
-        newconfig.orvibo.plugs[i] = plug;
+        if (!plug.address) continue;
+        var description = form.iolistform[prefix+'desc'].value;
+        if (description)
+            plug.description = description;
+        newconfig.orvibo.plugs.push(plug);
     }
 
     var command = new XMLHttpRequest();
