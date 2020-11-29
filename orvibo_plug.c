@@ -229,13 +229,15 @@ int orvibo_plug_set (int point, int state, int pulse) {
         else       fprintf (stderr, "set %s to %s at %ld\n", Plugs[point].name, namedstate, time(0));
     }
 
-    if (pulse > 0)
+    if (pulse > 0) {
         Plugs[point].deadline = time(0) + pulse;
-    else
+        houselog_event ("ORVIBO", Plugs[point].name, "SET",
+                        "%s FOR %d SECONDS", namedstate, pulse);
+    } else {
         Plugs[point].deadline = 0;
+        houselog_event ("ORVIBO", Plugs[point].name, "SET", "%s", namedstate);
+    }
     Plugs[point].commanded = state;
-    houselog_event ("ORVIBO", Plugs[point].name, "SET",
-                    "%s FOR %d SECONDS", namedstate, pulse);
 
     // Only send a command if we detected the device on the network.
     //
@@ -261,6 +263,8 @@ void orvibo_plug_periodic (time_t now) {
         }
         if (Plugs[i].status != Plugs[i].commanded) {
             if (Plugs[i].ipaddress.sin_port) {
+                const char *state = Plugs[i].commanded?"on":"off";
+                houselog_event ("ORVIBO", Plugs[i].name, "RETRY", "%s", state);
                 orvibo_plug_subscribe (i);
                 orvibo_plug_control (i, Plugs[i].commanded);
             }
@@ -288,7 +292,6 @@ const char *orvibo_plug_refresh (void) {
         if (plugs < 0) return "cannot find plugs array";
 
         PlugsCount = orvibo_config_array_length (plugs);
-        if (PlugsCount <= 0) return "no plug found";
         if (echttp_isdebug()) fprintf (stderr, "found %d plugs\n", PlugsCount);
     }
     PlugsSpace = PlugsCount + 32;
