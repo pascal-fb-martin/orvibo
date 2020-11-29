@@ -75,13 +75,15 @@
 #include <arpa/inet.h>
 
 #include "echttp.h"
+#include "echttp_json.h"
 #include "houselog.h"
 
 #include "orvibo_plug.h"
 #include "orvibo_config.h"
 
 struct PlugMap {
-    const char *name;
+    char name[32];
+    char description[256];
     char macaddress[16];
     struct sockaddr_in ipaddress;
     int status;
@@ -91,6 +93,7 @@ struct PlugMap {
 
 static struct PlugMap *Plugs;
 static int PlugsCount = 0;
+static int PlugsSpace = 0;
 
 static int OrviboSocket = -1;
 static struct sockaddr_in OrviboBroadcast;
@@ -233,8 +236,12 @@ int orvibo_plug_set (int point, int state, int pulse) {
     houselog_event ("ORVIBO", Plugs[point].name, "SET",
                     "%s FOR %d SECONDS", namedstate, pulse);
 
-    orvibo_plug_subscribe (point);
-    orvibo_plug_control (point, state);
+    // Only send a command if we detected the device on the network.
+    //
+    if (Plugs[point].ipaddress.sin_port) {
+        orvibo_plug_subscribe (point);
+        orvibo_plug_control (point, state);
+    }
 }
 
 void orvibo_plug_periodic (time_t now) {
@@ -252,8 +259,10 @@ void orvibo_plug_periodic (time_t now) {
             Plugs[i].deadline = 0;
         }
         if (Plugs[i].status != Plugs[i].commanded) {
-            orvibo_plug_subscribe (i);
-            orvibo_plug_control (i, Plugs[i].commanded);
+            if (Plugs[i].ipaddress.sin_port) {
+                orvibo_plug_subscribe (i);
+                orvibo_plug_control (i, Plugs[i].commanded);
+            }
         }
     }
     orvibo_plug_sense ();
@@ -263,9 +272,11 @@ const char *orvibo_plug_refresh (void) {
 
     int i;
     for (i = 0; i < PlugsCount; ++i) {
-        Plugs[i].name = 0;
+        Plugs[i].name[0] = 0;
         Plugs[i].macaddress[0] = 0;
+        Plugs[i].description[0] = 0;
         Plugs[i].deadline = 0;
+        Plugs[i].ipaddress.sin_port = 0;
     }
 
     if (orvibo_config_size() == 0) return 0; // Empty configuration.
@@ -277,7 +288,9 @@ const char *orvibo_plug_refresh (void) {
     if (PlugsCount <= 0) return "no plug found";
     if (echttp_isdebug()) fprintf (stderr, "found %d plugs\n", PlugsCount);
 
-    Plugs = calloc(sizeof(struct PlugMap), PlugsCount);
+    PlugsSpace = PlugsCount + 32;
+
+    Plugs = calloc(sizeof(struct PlugMap), PlugsSpace);
     if (!Plugs) return "no more memory";
 
     for (i = 0; i < PlugsCount; ++i) {
@@ -285,17 +298,43 @@ const char *orvibo_plug_refresh (void) {
         char path[128];
         snprintf (path, sizeof(path), "[%d]", i);
         plug = orvibo_config_object (plugs, path);
-        if (plug > 0) {
-            Plugs[i].name = orvibo_config_string (plug, ".name");
-            const char *mac = orvibo_config_string (plug, ".address");
-            if (mac)
-                strncpy (Plugs[i].macaddress, mac, sizeof(Plugs[i].macaddress));
-            if (echttp_isdebug()) fprintf (stderr, "found plug %s, address %s\n", Plugs[i].name, Plugs[i].macaddress);
-            Plugs[i].commanded = 0;
-            Plugs[i].deadline = 0;
+        if (plug <= 0) continue;
+        const char *name = orvibo_config_string (plug, ".name");
+        if (name) {
+            strncpy (Plugs[i].name, name, sizeof(Plugs[i].name));
+            Plugs[i].name[sizeof(Plugs[i].name)-1] = 0;
         }
+        const char *mac = orvibo_config_string (plug, ".address");
+        if (mac)
+            strncpy (Plugs[i].macaddress, mac, sizeof(Plugs[i].macaddress));
+        if (echttp_isdebug()) fprintf (stderr, "found plug %s, address %s\n", Plugs[i].name, Plugs[i].macaddress);
+        Plugs[i].commanded = 0;
+        Plugs[i].deadline = 0;
     }
     return 0;
+}
+
+const char *orvibo_plug_live_config (char *buffer, int size) {
+
+    static char pool[65537];
+    static ParserToken token[1024];
+    ParserContext context = echttp_json_start (token, 1024, pool, sizeof(pool));
+
+    int i;
+
+    int root = echttp_json_add_object (context, 0, 0);
+    int top = echttp_json_add_object (context, root, "orvibo");
+    int plugs = echttp_json_add_array (context, top, "plugs");
+
+    for (i = 0; i < PlugsCount; ++i) {
+        if (Plugs[i].name[0] == 0 || Plugs[i].macaddress[0] == 0) continue;
+        int plug = echttp_json_add_object (context, plugs, 0);
+        echttp_json_add_string (context, plug, "name", Plugs[i].name);
+        echttp_json_add_string (context, plug, "address", Plugs[i].macaddress);
+        echttp_json_add_string
+            (context, plug, "description", Plugs[i].description);
+    }
+    return echttp_json_export (context, buffer, size);
 }
 
 static int binary_equal (const unsigned char *a, const unsigned char *b, int size) {
@@ -364,6 +403,14 @@ static void orvibo_plug_receive (int fd, int mode) {
         }
         importmac (mac, data, macstart);
         plug = orvibo_plug_mac_search (mac);
+        if (plug < 0 && PlugsCount < PlugsSpace) {
+            plug = PlugsCount++;
+            snprintf (Plugs[plug].name, sizeof(Plugs[0].name), "plug%d", plug);
+            snprintf (Plugs[plug].macaddress, sizeof(Plugs[0].macaddress),
+                      "%s", mac);
+            snprintf (Plugs[plug].description, sizeof(Plugs[0].description),
+                      "autogenerated");
+        }
         if (plug >= 0) {
             memcpy (&(Plugs[plug].ipaddress),
                     &addr, sizeof(Plugs[plug].ipaddress));

@@ -160,8 +160,10 @@ static const char *orvibo_config (const char *method, const char *uri,
                                   const char *data, int length) {
 
     if (strcmp ("GET", method) == 0) {
-        echttp_transfer (orvibo_config_file(), orvibo_config_size());
+        static char buffer[65537];
+        orvibo_plug_live_config (buffer, sizeof(buffer));
         echttp_content_type_json ();
+        return buffer;
     } else if (strcmp ("POST", method) == 0) {
         const char *error = orvibo_config_update(data);
         if (error) echttp_error (400, error);
