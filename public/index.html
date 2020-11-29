@@ -52,21 +52,21 @@ window.onload = function() {
 
    function orviboShowConfig (response) {
       var iolist = document.getElementsByClassName ('iolist')[0];
-      var points = response.orvibo.points;
-      for (var i = 0; i < points.length; i++) {
-           var point = points[i];
+      var plugs = response.orvibo.plugs;
+      for (var i = 0; i < plugs.length; i++) {
+           var plug = plugs[i];
            var outer = document.createElement("tr");
 
            var inner = document.createElement("td");
            var label = document.createElement("span");
-           label.innerHTML = point.name;
+           label.innerHTML = plug.name;
            inner.appendChild(label);
            outer.appendChild(inner);
 
            inner = document.createElement("td");
            label = document.createElement("span");
            label.innerHTML = '(wait)';
-           label.id = 'state-'+point.name;
+           label.id = 'state-'+plug.name;
            inner.appendChild(label);
            outer.appendChild(inner);
 
@@ -74,17 +74,17 @@ window.onload = function() {
            var button = document.createElement("button");
            button.innerHTML = '(wait)';
            button.disabled = true;
-           button.id = 'button-'+point.name;
+           button.id = 'button-'+plug.name;
            button.onclick = controlClick;
-           button.controlName = point.name;
-           button.controlOn = point.on;
+           button.controlName = plug.name;
+           button.controlstate = 'on';
            inner.appendChild(button);
            outer.appendChild(inner);
 
            inner = document.createElement("td");
            label = document.createElement("span");
-           if (point.description)
-               label.innerHTML = point.description;
+           if (plug.description)
+               label.innerHTML = plug.description;
            else
                label.innerHTML = '';
            inner.appendChild(label);
