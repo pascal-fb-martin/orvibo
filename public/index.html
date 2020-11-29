@@ -23,6 +23,7 @@ function orviboShowStatus (response) {
             button.disabled = false;
         } else {
             state.innerHTML = value.state;
+            button.innerHTML = 'ON';
             button.disabled = true;
         }
     }
