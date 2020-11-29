@@ -421,9 +421,16 @@ static void orvibo_plug_receive (int fd, int mode) {
                             "MAC ADDRESS %s", Plugs[plug].macaddress);
         }
         if (plug >= 0) {
+            int status = (data[statepos] == 1);
+            if (Plugs[plug].status != status) {
+                houselog_event ("ORVIBO", Plugs[plug].name, "CHANGED",
+                                "FROM %s TO %s",
+                                Plugs[plug].status?"on":"off",
+                                status?"on":"off");
+                Plugs[plug].status = status;
+            }
             memcpy (&(Plugs[plug].ipaddress),
                     &addr, sizeof(Plugs[plug].ipaddress));
-            Plugs[plug].status = (data[statepos] == 1);
         }
     }
 }

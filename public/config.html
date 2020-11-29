@@ -19,7 +19,7 @@ function saveConfig () {
         var plug = new Object();
         plug.name = form.iolistform[prefix+'name'].value;
         if (!plug.name) continue;
-        plug.address = parseInt(form.iolistform[prefix+'address'].value);
+        plug.address = form.iolistform[prefix+'address'].value;
         if (!plug.address) continue;
         var description = form.iolistform[prefix+'desc'].value;
         if (description)
@@ -57,8 +57,6 @@ function showPlug (name, address, description) {
     entry = document.createElement("input");
     entry.type = 'text';
     entry.name = prefix+'address';
-    entry.min = 1;
-    entry.max = 99;
     entry.value = address;
     entry.placeholder = 'MAC Address';
     entry.inputmode = 'numeric';
