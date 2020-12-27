@@ -4,7 +4,7 @@ LIBOJS=
 
 SHARE=/usr/local/share/house
 
-all: orvibo
+all: orvibo orvibosetup
 
 clean:
 	rm -f *.o *.a orvibo
@@ -16,6 +16,9 @@ rebuild: clean all
 
 orvibo: $(OBJS)
 	gcc -g -O -o orvibo $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lgpiod -lrt
+
+orvibosetup: orvibosetup.o
+	gcc -g -O -o orvibosetup orvibosetup.o
 
 install:
 	if [ -e /etc/init.d/orvibo ] ; then systemctl stop orvibo ; fi
