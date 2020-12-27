@@ -15,7 +15,7 @@ rebuild: clean all
 	gcc -c -g -O -o $@ $<
 
 orvibo: $(OBJS)
-	gcc -g -O -o orvibo $(OBJS) -lhouseportal -lechttp -lcrypto -lgpiod -lrt
+	gcc -g -O -o orvibo $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lgpiod -lrt
 
 install:
 	if [ -e /etc/init.d/orvibo ] ; then systemctl stop orvibo ; fi
