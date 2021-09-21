@@ -99,6 +99,7 @@ static const char *orvibo_status (const char *method, const char *uri,
         echttp_json_add_string (context, point, "command", commanded);
         if (pulsed)
             echttp_json_add_integer (context, point, "pulse", (int)pulsed);
+        echttp_json_add_string (context, point, "gear", "light");
     }
     const char *error = echttp_json_export (context, buffer, 65537);
     if (error) {
