@@ -7,6 +7,9 @@ function orviboShowStatus (response) {
 
     document.getElementById('portal').href = 'http://'+response.proxy+'/index.html';
 
+    document.getElementsByTagName('title')[0].innerHTML =
+        response.host+' - Orvibo Plugs';
+
     var state = response.control.status;
     for (const [key, value] of Object.entries(state)) {
         var state = document.getElementById ('state-'+key);

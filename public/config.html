@@ -84,6 +84,8 @@ function addConfig () {
 }
 
 function orviboShowConfig (response) {
+   document.getElementsByTagName('title')[0].innerHTML =
+       response.host+' - Orvibo Plugs';
    var iolist = document.getElementsByClassName ('iolist')[0];
    var plugs = response.orvibo.plugs;
    for (var i = 0; i < plugs.length; i++) {
