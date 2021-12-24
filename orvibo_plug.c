@@ -336,6 +336,9 @@ const char *orvibo_plug_refresh (void) {
         const char *mac = houseconfig_string (plug, ".address");
         if (mac)
             strncpy (Plugs[i].macaddress, mac, sizeof(Plugs[i].macaddress));
+        const char *desc = houseconfig_string (plug, ".description");
+        if (desc)
+            snprintf (Plugs[i].description, sizeof(Plugs[i].description), "%s", desc);
         if (echttp_isdebug()) fprintf (stderr, "found plug %s, address %s\n", Plugs[i].name, Plugs[i].macaddress);
         Plugs[i].commanded = 0;
         Plugs[i].deadline = 0;
