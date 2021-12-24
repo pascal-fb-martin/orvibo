@@ -41,9 +41,9 @@
 #include "echttp_static.h"
 #include "houseportalclient.h"
 #include "houselog.h"
+#include "houseconfig.h"
 
 #include "orvibo_plug.h"
-#include "orvibo_config.h"
 
 static int use_houseportal = 0;
 static char HostName[256];
@@ -169,7 +169,7 @@ static const char *orvibo_config (const char *method, const char *uri,
         echttp_content_type_json ();
         return buffer;
     } else if (strcmp ("POST", method) == 0) {
-        const char *error = orvibo_config_update(data);
+        const char *error = houseconfig_update(data);
         if (error) echttp_error (400, error);
         orvibo_plug_refresh();
     } else {
@@ -224,7 +224,8 @@ int main (int argc, const char **argv) {
     }
     houselog_initialize ("orvibo", argc, argv);
 
-    error = orvibo_config_load (argc, argv);
+    houseconfig_default ("-config=orvibo");
+    error = houseconfig_load (argc, argv);
     if (error) {
         houselog_trace
             (HOUSE_FAILURE, "CONFIG", "Cannot load configuration: %s\n", error);

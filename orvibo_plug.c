@@ -81,9 +81,9 @@
 #include "echttp.h"
 #include "echttp_json.h"
 #include "houselog.h"
+#include "houseconfig.h"
 
 #include "orvibo_plug.h"
-#include "orvibo_config.h"
 
 struct PlugMap {
     char name[32];
@@ -310,11 +310,11 @@ const char *orvibo_plug_refresh (void) {
     }
     PlugsCount = 0;
 
-    if (orvibo_config_size() > 0) {
-        plugs = orvibo_config_array (0, ".orvibo.plugs");
+    if (houseconfig_size() > 0) {
+        plugs = houseconfig_array (0, ".orvibo.plugs");
         if (plugs < 0) return "cannot find plugs array";
 
-        PlugsCount = orvibo_config_array_length (plugs);
+        PlugsCount = houseconfig_array_length (plugs);
         if (echttp_isdebug()) fprintf (stderr, "found %d plugs\n", PlugsCount);
     }
     PlugsSpace = PlugsCount + 32;
@@ -326,14 +326,14 @@ const char *orvibo_plug_refresh (void) {
         int plug;
         char path[128];
         snprintf (path, sizeof(path), "[%d]", i);
-        plug = orvibo_config_object (plugs, path);
+        plug = houseconfig_object (plugs, path);
         if (plug <= 0) continue;
-        const char *name = orvibo_config_string (plug, ".name");
+        const char *name = houseconfig_string (plug, ".name");
         if (name) {
             strncpy (Plugs[i].name, name, sizeof(Plugs[i].name));
             Plugs[i].name[sizeof(Plugs[i].name)-1] = 0;
         }
-        const char *mac = orvibo_config_string (plug, ".address");
+        const char *mac = houseconfig_string (plug, ".address");
         if (mac)
             strncpy (Plugs[i].macaddress, mac, sizeof(Plugs[i].macaddress));
         if (echttp_isdebug()) fprintf (stderr, "found plug %s, address %s\n", Plugs[i].name, Plugs[i].macaddress);

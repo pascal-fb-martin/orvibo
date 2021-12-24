@@ -1,5 +1,5 @@
 
-OBJS= orvibo_config.o orvibo_plug.o orvibo.o
+OBJS= orvibo_plug.o orvibo.o
 LIBOJS=
 
 SHARE=/usr/local/share/house
