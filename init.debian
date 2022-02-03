@@ -6,7 +6,8 @@
 # Required-Stop:   $network $remote_fs $syslog $houseportal
 # Default-Start:   2 3 4 5
 # Default-Stop: 
-# Short-Description: Start the Orvibo plugs Web Access daemon
+# Short-Description: Orvibo devices control
+# Description:       A web service that detects, control and report the status of Orvibo smart plug devices
 ### END INIT INFO
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
