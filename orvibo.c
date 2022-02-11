@@ -217,7 +217,7 @@ int main (int argc, const char **argv) {
 
     echttp_default ("-http-service=dynamic");
 
-    echttp_open (argc, argv);
+    argc = echttp_open (argc, argv);
     if (echttp_dynamic_port()) {
         houseportal_initialize (argc, argv);
         use_houseportal = 1;
