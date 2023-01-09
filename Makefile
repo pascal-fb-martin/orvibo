@@ -21,15 +21,17 @@ orvibosetup: orvibosetup.o
 	gcc -g -O -o orvibosetup orvibosetup.o
 
 install:
-	if [ -e /etc/init.d/orvibo ] ; then systemctl stop orvibo ; fi
+	if [ -e /etc/init.d/orvibo ] ; then systemctl stop orvibo ; systemctl disable orvibo ; rm -f /etc/init.d/orvibo ; fi
+	if [ -e /lib/systemd/system/orvibo.service ] ; then systemctl stop orvibo ; systemctl disable orvibo ; rm -f /lib/systemd/system/orvibo.service ; fi
 	mkdir -p /usr/local/bin
 	mkdir -p /var/lib/house
 	mkdir -p /etc/house
-	rm -f /usr/local/bin/orvibo /etc/init.d/orvibo
+	rm -f /usr/local/bin/orvibo
 	cp orvibo /usr/local/bin
-	cp init.debian /etc/init.d/orvibo
-	chown root:root /usr/local/bin/orvibo /etc/init.d/orvibo
-	chmod 755 /usr/local/bin/orvibo /etc/init.d/orvibo
+	chown root:root /usr/local/bin/orvibo
+	chmod 755 /usr/local/bin/orvibo
+	cp systemd.service /lib/systemd/system/orvibo.service
+	chown root:root /lib/systemd/system/orvibo.service
 	mkdir -p $(SHARE)/public/orvibo
 	chmod 755 $(SHARE) $(SHARE)/public $(SHARE)/public/orvibo
 	cp public/* $(SHARE)/public/orvibo
@@ -43,7 +45,8 @@ install:
 uninstall:
 	systemctl stop orvibo
 	systemctl disable orvibo
-	rm -f /usr/local/bin/orvibo /etc/init.d/orvibo
+	rm -f /usr/local/bin/orvibo
+	rm -f /lib/systemd/system/orvibo.service /etc/init.d/orvibo
 	systemctl daemon-reload
 
 purge: uninstall

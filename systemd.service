@@ -1,0 +1,12 @@
+[Unit]
+Description=the house Orvibo plug control web service
+After=network-online.target houseportal.service
+
+[Service]
+EnvironmentFile=-/etc/default/orvibo
+EnvironmentFile=-/etc/sysconfig/orvibo
+ExecStart=/usr/local/bin/orvibo $OPTS
+
+[Install]
+WantedBy=multi-user.target
+
