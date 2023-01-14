@@ -45,6 +45,7 @@ install:
 uninstall:
 	systemctl stop orvibo
 	systemctl disable orvibo
+	rm -rf $(SHARE)/public/orvibo
 	rm -f /usr/local/bin/orvibo
 	rm -f /lib/systemd/system/orvibo.service /etc/init.d/orvibo
 	systemctl daemon-reload
