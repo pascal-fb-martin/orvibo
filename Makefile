@@ -12,13 +12,13 @@ clean:
 rebuild: clean all
 
 %.o: %.c
-	gcc -c -g -O -o $@ $<
+	gcc -c -Os -o $@ $<
 
 orvibo: $(OBJS)
-	gcc -g -O -o orvibo $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lgpiod -lrt
+	gcc -Os -o orvibo $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lgpiod -lrt
 
 orvibosetup: orvibosetup.o
-	gcc -g -O -o orvibosetup orvibosetup.o
+	gcc -Os -o orvibosetup orvibosetup.o
 
 install:
 	if [ -e /etc/init.d/orvibo ] ; then systemctl stop orvibo ; systemctl disable orvibo ; rm -f /etc/init.d/orvibo ; fi
