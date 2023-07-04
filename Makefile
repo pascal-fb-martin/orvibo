@@ -4,6 +4,8 @@ LIBOJS=
 
 SHARE=/usr/local/share/house
 
+# Local build ---------------------------------------------------
+
 all: orvibo orvibosetup
 
 clean:
@@ -20,9 +22,9 @@ orvibo: $(OBJS)
 orvibosetup: orvibosetup.o
 	gcc -Os -o orvibosetup orvibosetup.o
 
-install:
-	if [ -e /etc/init.d/orvibo ] ; then systemctl stop orvibo ; systemctl disable orvibo ; rm -f /etc/init.d/orvibo ; fi
-	if [ -e /lib/systemd/system/orvibo.service ] ; then systemctl stop orvibo ; systemctl disable orvibo ; rm -f /lib/systemd/system/orvibo.service ; fi
+# Distribution agnostic file installation -----------------------
+
+install-files:
 	mkdir -p /usr/local/bin
 	mkdir -p /var/lib/house
 	mkdir -p /etc/house
@@ -30,26 +32,57 @@ install:
 	cp orvibo /usr/local/bin
 	chown root:root /usr/local/bin/orvibo
 	chmod 755 /usr/local/bin/orvibo
-	cp systemd.service /lib/systemd/system/orvibo.service
-	chown root:root /lib/systemd/system/orvibo.service
 	mkdir -p $(SHARE)/public/orvibo
 	chmod 755 $(SHARE) $(SHARE)/public $(SHARE)/public/orvibo
 	cp public/* $(SHARE)/public/orvibo
 	chown root:root $(SHARE)/public/orvibo/*
 	chmod 644 $(SHARE)/public/orvibo/*
 	touch /etc/default/orvibo
+
+uninstall-files:
+	rm -rf $(SHARE)/public/orvibo
+	rm -f /usr/local/bin/orvibo
+	rm -f /lib/systemd/system/orvibo.service /etc/init.d/orvibo
+
+purge-config:
+	rm -rf /etc/house/orvibo.config /etc/default/orvibo
+
+# Distribution agnostic systemd support -------------------------
+
+install-systemd:
+	cp systemd.service /lib/systemd/system/orvibo.service
+	chown root:root /lib/systemd/system/orvibo.service
 	systemctl daemon-reload
 	systemctl enable orvibo
 	systemctl start orvibo
 
-uninstall:
-	systemctl stop orvibo
-	systemctl disable orvibo
-	rm -rf $(SHARE)/public/orvibo
-	rm -f /usr/local/bin/orvibo
-	rm -f /lib/systemd/system/orvibo.service /etc/init.d/orvibo
-	systemctl daemon-reload
+uninstall-systemd:
+	if [ -e /etc/init.d/orvibo ] ; then systemctl stop orvibo ; systemctl disable orvibo ; rm -f /etc/init.d/orvibo ; fi
+	if [ -e /lib/systemd/system/orvibo.service ] ; then systemctl stop orvibo ; systemctl disable orvibo ; rm -f /lib/systemd/system/orvibo.service ; systemctl daemon-reload ; fi
 
-purge: uninstall
-	rm -rf /etc/house/orvibo.config /etc/default/orvibo
+stop-systemd: uninstall-systemd
+
+# Debian GNU/Linux install --------------------------------------
+
+install-debian: stop-systemd install-files install-systemd
+
+uninstall-debian: uninstall-systemd uninstall-files
+
+purge-debian: uninstall-debian purge-config
+
+# Void Linux install --------------------------------------------
+
+install-void: install-files
+
+uninstall-void: uninstall-files
+
+purge-void: uninstall-void purge-config
+
+# Default install (Debian GNU/Linux) ----------------------------
+
+install: install-debian
+
+uninstall: uninstall-debian
+
+purge: purge-debian
 
