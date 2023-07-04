@@ -42,7 +42,6 @@ install-files:
 uninstall-files:
 	rm -rf $(SHARE)/public/orvibo
 	rm -f /usr/local/bin/orvibo
-	rm -f /lib/systemd/system/orvibo.service /etc/init.d/orvibo
 
 purge-config:
 	rm -rf /etc/house/orvibo.config /etc/default/orvibo
