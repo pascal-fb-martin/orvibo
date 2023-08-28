@@ -1,0 +1,6 @@
+#!/bin/sh
+OPTS=
+if [ -e /etc/default/orvibo ] ; then . /etc/default/orvibo ; fi
+sv start houseportal || exit 1
+exec /usr/local/bin/orvibo $OPTS
+
