@@ -37,7 +37,7 @@ rebuild: clean all
 	gcc -c -Os -o $@ $<
 
 orvibo: $(OBJS)
-	gcc -Os -o orvibo $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lgpiod -lrt
+	gcc -Os -o orvibo $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lrt
 
 orvibosetup: orvibosetup.o
 	gcc -Os -o orvibosetup orvibosetup.o
