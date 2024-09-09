@@ -194,6 +194,7 @@ static void orvibo_background (int fd, int mode) {
         }
     }
     orvibo_plug_periodic(now);
+    houselog_background(now);
 }
 
 static void orvibo_protect (const char *method, const char *uri) {
