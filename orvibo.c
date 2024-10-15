@@ -40,8 +40,10 @@
 #include "echttp_json.h"
 #include "echttp_static.h"
 #include "houseportalclient.h"
+#include "housediscover.h"
 #include "houselog.h"
 #include "houseconfig.h"
+#include "housedepositor.h"
 
 #include "orvibo_plug.h"
 
@@ -170,8 +172,13 @@ static const char *orvibo_config (const char *method, const char *uri,
         return buffer;
     } else if (strcmp ("POST", method) == 0) {
         const char *error = houseconfig_update(data);
-        if (error) echttp_error (400, error);
-        orvibo_plug_refresh();
+        if (error) {
+            echttp_error (400, error);
+        } else {
+            orvibo_plug_refresh();
+            houselog_event ("SYSTEM", "CONFIG", "SAVE", "TO DEPOT %s", houseconfig_name());
+            housedepositor_put ("config", houseconfig_name(), data, length);
+        }
     } else {
         echttp_error (400, "invalid method");
     }
@@ -194,7 +201,16 @@ static void orvibo_background (int fd, int mode) {
         }
     }
     orvibo_plug_periodic(now);
+    housediscover (now);
     houselog_background(now);
+    housedepositor_periodic (now);
+}
+
+static void orvibo_config_listener (const char *name, time_t timestamp,
+                                    const char *data, int length) {
+
+    houselog_event ("SYSTEM", "CONFIG", "LOAD", "FROM DEPOT %s", name);
+    if (!houseconfig_update (data)) orvibo_plug_refresh();
 }
 
 static void orvibo_protect (const char *method, const char *uri) {
@@ -223,7 +239,9 @@ int main (int argc, const char **argv) {
         houseportal_initialize (argc, argv);
         use_houseportal = 1;
     }
+    housediscover_initialize (argc, argv);
     houselog_initialize ("orvibo", argc, argv);
+    housedepositor_initialize (argc, argv);
 
     houseconfig_default ("-config=orvibo");
     error = houseconfig_load (argc, argv);
@@ -237,6 +255,7 @@ int main (int argc, const char **argv) {
             (HOUSE_FAILURE, "PLUG", "Cannot initialize: %s\n", error);
         exit(1);
     }
+    housedepositor_subscribe ("config", houseconfig_name(), orvibo_config_listener);
 
     echttp_cors_allow_method("GET");
     echttp_protect (0, orvibo_protect);
