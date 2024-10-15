@@ -310,7 +310,7 @@ const char *orvibo_plug_refresh (void) {
     }
     PlugsCount = 0;
 
-    if (houseconfig_size() > 0) {
+    if (houseconfig_active()) {
         plugs = houseconfig_array (0, ".orvibo.plugs");
         if (plugs < 0) return "cannot find plugs array";
 
