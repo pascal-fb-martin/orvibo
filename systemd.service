@@ -3,9 +3,10 @@ Description=the house Orvibo plug control web service
 After=network-online.target houseportal.service
 
 [Service]
+Environment="HTTPOPTS=" "HOUSEOPT=" "OTHEROPTS=" "OPTS="
 EnvironmentFile=-/etc/default/orvibo
 EnvironmentFile=-/etc/sysconfig/orvibo
-ExecStart=/usr/local/bin/orvibo $OPTS
+ExecStart=/usr/local/bin/orvibo $HTTPOPTS $HOUSEOPT $OTHEROPTS $OPTS
 
 [Install]
 WantedBy=multi-user.target

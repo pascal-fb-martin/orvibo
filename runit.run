@@ -1,6 +1,10 @@
 #!/bin/sh
 OPTS=
+HTTPOPTS=
+HOUSEOPT=
+OTHEROPTS=
+if [ -e /etc/default/housegeneric ] ; then . /etc/default/housegeneric ; fi
 if [ -e /etc/default/orvibo ] ; then . /etc/default/orvibo ; fi
 sv start houseportal || exit 1
-exec /usr/local/bin/orvibo $OPTS
+exec /usr/local/bin/orvibo $HTTPOPTS $HOUSEOPT $OTHEROPTS $OPTS
 

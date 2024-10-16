@@ -20,7 +20,13 @@ PIDFILE=/var/run/orvibo.pid
 test -x $DAEMON || exit 0
 
 OPTS=
+HTTPOPTS=
+OTHEROPTS=
+HOUSEOPTS=
 
+if [ -r /etc/default/housegeneric ]; then
+    . /etc/default/housegeneric
+fi
 if [ -r /etc/default/orvibo ]; then
 	. /etc/default/orvibo
 fi
@@ -29,7 +35,7 @@ fi
 case $1 in
 	start)
 		log_daemon_msg "Starting the Orvibo web server" "orvibo"
-		start-stop-daemon --start --quiet --oknodo --background --pidfile $PIDFILE --make-pidfile --startas $DAEMON -- $OPTS
+		start-stop-daemon --start --quiet --oknodo --background --pidfile $PIDFILE --make-pidfile --startas $DAEMON -- $HTTPOPTS $HOUSEOPTS $OTHEROPTS $OPTS
 		log_end_msg $?
   		;;
 	stop)
