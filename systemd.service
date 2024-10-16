@@ -4,7 +4,9 @@ After=network-online.target houseportal.service
 
 [Service]
 Environment="HTTPOPTS=" "HOUSEOPT=" "OTHEROPTS=" "OPTS="
+EnvironmentFile=-/etc/default/housegeneric
 EnvironmentFile=-/etc/default/orvibo
+EnvironmentFile=-/etc/sysconfig/housegeneric
 EnvironmentFile=-/etc/sysconfig/orvibo
 ExecStart=/usr/local/bin/orvibo $HTTPOPTS $HOUSEOPT $OTHEROPTS $OPTS
 
