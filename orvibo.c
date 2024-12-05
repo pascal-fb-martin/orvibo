@@ -247,12 +247,12 @@ int main (int argc, const char **argv) {
     error = houseconfig_load (argc, argv);
     if (error) {
         houselog_trace
-            (HOUSE_FAILURE, "CONFIG", "Cannot load configuration: %s\n", error);
+            (HOUSE_FAILURE, "CONFIG", "Cannot load configuration: %s", error);
     }
     error = orvibo_plug_initialize (argc, argv);
     if (error) {
         houselog_trace
-            (HOUSE_FAILURE, "PLUG", "Cannot initialize: %s\n", error);
+            (HOUSE_FAILURE, "PLUG", "Cannot initialize: %s", error);
         exit(1);
     }
     housedepositor_subscribe ("config", houseconfig_name(), orvibo_config_listener);
