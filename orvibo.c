@@ -47,7 +47,6 @@
 
 #include "orvibo_plug.h"
 
-static int use_houseportal = 0;
 static char HostName[256];
 
 static void hc_help (const char *argv0) {
@@ -187,19 +186,9 @@ static const char *orvibo_config (const char *method, const char *uri,
 
 static void orvibo_background (int fd, int mode) {
 
-    static time_t LastRenewal = 0;
     time_t now = time(0);
 
-    if (use_houseportal) {
-        static const char *path[] = {"control:/orvibo"};
-        if (now >= LastRenewal + 60) {
-            if (LastRenewal > 0)
-                houseportal_renew();
-            else
-                houseportal_register (echttp_port(4), path, 1);
-            LastRenewal = now;
-        }
-    }
+    houseportal_background (now);
     orvibo_plug_periodic(now);
     housediscover (now);
     houselog_background(now);
@@ -236,8 +225,9 @@ int main (int argc, const char **argv) {
 
     argc = echttp_open (argc, argv);
     if (echttp_dynamic_port()) {
+        static const char *path[] = {"control:/orvibo"};
         houseportal_initialize (argc, argv);
-        use_houseportal = 1;
+        houseportal_declare (echttp_port(4), path, 1);
     }
     housediscover_initialize (argc, argv);
     houselog_initialize ("orvibo", argc, argv);
