@@ -1,10 +1,14 @@
 # orvibo
 A House web service to read and control Orvibo S20 WiFi plugs
+
 ## Overview
 This is a web server to give access to Ovibo WiFi electric plugs. This server can sense the current status and control the state of each plug. The web API is meant to be compatible with the House control API (e.g. the same web API as [houserelays](https://github.com/pascal-fb-martin/houserelays)).
-## Warning
-The Orvibo S20 is a discontinued model. Newer Orvibo models do not use the same protocol and this program is not compatible with them.
+
+> [!WARNING]
+> The Orvibo S20 is a discontinued model. Newer Orvibo models do not use the same protocol and this program is not compatible with them.
+
 ## Installation
+
 * Install the OpenSSL development package(s).
 * Install [echttp](https://github.com/pascal-fb-martin/echttp).
 * Install [houseportal](https://github.com/pascal-fb-martin/houseportal).
@@ -12,7 +16,9 @@ The Orvibo S20 is a discontinued model. Newer Orvibo models do not use the same 
 * make
 * sudo make install
 * Edit /etc/house/orvibo.json (see below)
+
 ## Configuration
+
 Each plug must be declared in file /etc/house/orvibo.json. A typical example of configuration is:
 ```
 {
@@ -38,6 +44,7 @@ The web service comes with a small command line tool to configure the Orvibo S20
 orvibosetup <ssid>
 ```
 The tool first asks for the WiFi password (without echoing it) and then proceeds with the setup. The S20 must already be accessible from the computer (typically if you plan on changing your WiFi password). If it is not, follow the steps below to connect the device:
+
 * Plug the S20 device in a nearby outlet.
 * Press the button until it flashes red at high speed, then release the button.
 * Press the button again until it flashes blue at high speed, then release the button.
