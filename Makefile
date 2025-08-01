@@ -16,10 +16,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA.
+#
+# WARNING
+# 
+# This Makefile depends on echttp and houseportal (dev) being installed.
+
+prefix=/usr/local
+SHARE=$(prefix)/share/house
+        
+INSTALL=/usr/bin/install
 
 HAPP=orvibo
-HROOT=/usr/local
-SHARE=$(HROOT)/share/house
 
 # Application build ---------------------------------------------
 
@@ -37,36 +44,30 @@ rebuild: clean all
 	gcc -c -Os -o $@ $<
 
 orvibo: $(OBJS)
-	gcc -Os -o orvibo $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lrt
+	gcc -Os -o orvibo $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lmagic -lrt
 
 orvibosetup: orvibosetup.o
 	gcc -Os -o orvibosetup orvibosetup.o
 
 # Distribution agnostic file installation -----------------------
 
-install-app:
-	mkdir -p $(HROOT)/bin
-	mkdir -p /var/lib/house
-	mkdir -p /etc/house
-	rm -f $(HROOT)/bin/orvibo
-	cp orvibo $(HROOT)/bin
-	chown root:root $(HROOT)/bin/orvibo
-	chmod 755 $(HROOT)/bin/orvibo
-	mkdir -p $(SHARE)/public/orvibo
-	chmod 755 $(SHARE) $(SHARE)/public $(SHARE)/public/orvibo
-	cp public/* $(SHARE)/public/orvibo
-	chown root:root $(SHARE)/public/orvibo/*
-	chmod 644 $(SHARE)/public/orvibo/*
-	touch /etc/default/orvibo
+install-ui: install-preamble
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(SHARE)/public/orvibo
+	$(INSTALL) -m 0644 public/* $(DESTDIR)$(SHARE)/public/orvibo
+
+install-app: install-ui
+	$(INSTALL) -m 0755 -s orvibo $(DESTDIR)$(prefix)/bin
+	touch $(DESTDIR)/etc/default/orvibo
 
 uninstall-app:
-	rm -rf $(SHARE)/public/orvibo
-	rm -f $(HROOT)/bin/orvibo
+	rm -rf $(DESTDIR)$(SHARE)/public/orvibo
+	rm -f $(DESTDIR)$(prefix)/bin/orvibo
 
 purge-app:
 
 purge-config:
-	rm -rf /etc/house/orvibo.config /etc/default/orvibo
+	rm -f $(DESTDIR)/etc/house/orvibo.config
+	rm -f $(DESTDIR)/etc/default/orvibo
 
 # System installation. ------------------------------------------
 
