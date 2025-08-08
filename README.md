@@ -58,3 +58,19 @@ Warning: if you have multiple S20 devices on the network, they will all be impac
 
 Warning: the WiFi password is sent in the clear, possibly through an open WiFi network.
 
+## Debian Packaging
+
+The provided Makefile supports building private Debian packages. These are _not_ official packages:
+
+- They do not follow all Debian policies.
+
+- They are not built using Debian standard conventions and tools.
+
+- The packaging is not separate from the upstream sources, and there is
+  no source package.
+
+To build a Debian package, use the `debian-package` target:
+```
+make debian-package
+```
+
