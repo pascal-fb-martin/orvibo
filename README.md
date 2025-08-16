@@ -1,7 +1,9 @@
 # orvibo
+
 A House web service to read and control Orvibo S20 WiFi plugs
 
 ## Overview
+
 This is a web server to give access to Ovibo WiFi electric plugs. This server can sense the current status and control the state of each plug. The web API is meant to be compatible with the House control API (e.g. the same web API as [houserelays](https://github.com/pascal-fb-martin/houserelays)).
 
 > [!WARNING]
@@ -20,6 +22,7 @@ This is a web server to give access to Ovibo WiFi electric plugs. This server ca
 ## Configuration
 
 Each plug must be declared in file /etc/house/orvibo.json. A typical example of configuration is:
+
 ```
 {
     "orvibo" : {
@@ -38,11 +41,15 @@ Each plug must be declared in file /etc/house/orvibo.json. A typical example of 
     }
 }
 ```
+
 ## S20 Setup
+
 The web service comes with a small command line tool to configure the Orvibo S20 for the local WiFi network, called orvibosetup:
+
 ```
 orvibosetup <ssid>
 ```
+
 The tool first asks for the WiFi password (without echoing it) and then proceeds with the setup. The S20 must already be accessible from the computer (typically if you plan on changing your WiFi password). If it is not, follow the steps below to connect the device:
 
 * Plug the S20 device in a nearby outlet.
@@ -70,6 +77,7 @@ The provided Makefile supports building private Debian packages. These are _not_
   no source package.
 
 To build a Debian package, use the `debian-package` target:
+
 ```
 make debian-package
 ```
