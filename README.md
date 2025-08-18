@@ -1,4 +1,4 @@
-# orvibo
+# Orvibo
 
 A House web service to read and control Orvibo S20 WiFi plugs
 
