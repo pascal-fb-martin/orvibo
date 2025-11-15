@@ -1,3 +1,9 @@
+orvibo (1.4) UNRELEASED; urgency=low
+
+   * Use a more semantic web UI with better layout.
+
+ -- Pascal Martin <pascal.fb.martin@gmail.com>  Fri, 14 Nov 2025 12:00:00 PDT
+
 orvibo (1.3) UNRELEASED; urgency=low
 
    * Install README.md as an online manual.

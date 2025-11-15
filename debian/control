@@ -1,5 +1,5 @@
 Source: orvibo
-Version: 1.3
+Version: 1.4
 Section: Web servers
 Maintainer: Pascal Martin <pascal.fb.martin@gmail.com>
 Priority: optional
@@ -7,7 +7,7 @@ Homepage: https://github.com/pascal-fb-martin/orvibo
 Standard-Version: 4.7.0
 Package: orvibo
 Architecture: {{arch}}
-Depends: houseportal
+Depends: houseportal (>= 2.9)
 Description: A House service to control Orvibo WiFi plugs
  Orvibo is part of the House suite of web services.
  .

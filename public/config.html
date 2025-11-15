@@ -105,7 +105,6 @@ function orviboConfig () {
 }
 
 function orviboShowStatus (response) {
-    document.getElementById('portal').href = 'http://'+response.proxy+'/index.html';
    document.getElementsByTagName('title')[0].innerHTML =
        response.host+' - Orvibo Plugs';
 }
@@ -130,18 +129,16 @@ window.onload = function() {
    <title>Orvibo Plugs</title>
 </head>
 <body>
-   <table class="housetopcontainer">
-   <tr><td>
-   <table class="housetop">
+   <header>
+   <table>
    <tr>
-   <td><a id="portal" href="/index.html">Portal</a></td>
    <td><a href="/orvibo/index.html">Orvibo</a></td>
    <td><a href="/orvibo/events.html">Events</a></td>
    <td><span>Config</span></td>
    </tr>
    </table>
-   </td></tr>
-   </table>
+   </header>
+   <section>
    <form name="iolistform">
    <table class="houselargetable iolist">
       <tr>
@@ -155,6 +152,7 @@ window.onload = function() {
       <button class="actionbutton" onclick="addConfig()">Add</button>
       <button class="actionbutton" onclick="saveConfig()">Save</button>
    </div>
+   </section>
 </body>
 </html>
 
