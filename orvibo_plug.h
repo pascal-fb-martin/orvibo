@@ -21,7 +21,7 @@
  * orvibo_plug.h - An implementation of the Orvibo plug protocol.
  *
  */
-const char *orvibo_plug_initialize (int argc, const char **argv);
+const char *orvibo_plug_initialize (int argc, const char **argv, int livestate);
 const char *orvibo_plug_refresh (void);
 
 int orvibo_plug_count (void);

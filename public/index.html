@@ -3,7 +3,12 @@
 <head>
 <link rel=stylesheet type="text/css" href="/house.css" title="House">
 <script>
+
+var LatestStatus = 0;
+
 function orviboShowStatus (response) {
+
+    if (response.latest) LatestStatus = response.latest;
 
     document.getElementsByTagName('title')[0].innerHTML =
         response.host+' - Orvibo Plugs';
@@ -31,8 +36,11 @@ function orviboShowStatus (response) {
 }
 
 function orviboStatus () {
+    var url = "/orvibo/status";
+    if (LatestStatus) url += "?known=" + LatestStatus;
+
     var command = new XMLHttpRequest();
-    command.open("GET", "/orvibo/status");
+    command.open("GET", url);
     command.onreadystatechange = function () {
         if (command.readyState === 4 && command.status === 200) {
             orviboShowStatus (JSON.parse(command.responseText));

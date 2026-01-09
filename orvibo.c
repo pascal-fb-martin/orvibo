@@ -43,9 +43,12 @@
 #include "housediscover.h"
 #include "houselog.h"
 #include "houseconfig.h"
+#include "housestate.h"
 #include "housedepositor.h"
 
 #include "orvibo_plug.h"
+
+static int LiveState = 0;
 
 static char HostName[256];
 
@@ -70,6 +73,9 @@ static void hc_help (const char *argv0) {
 
 static const char *orvibo_status (const char *method, const char *uri,
                                   const char *data, int length) {
+
+    if (housestate_same (LiveState)) return "";
+
     static char buffer[65537];
     ParserToken token[1024];
     char pool[65537];
@@ -85,6 +91,7 @@ static const char *orvibo_status (const char *method, const char *uri,
     echttp_json_add_string (context, root, "host", host);
     echttp_json_add_string (context, root, "proxy", houseportal_server());
     echttp_json_add_integer (context, root, "timestamp", (long)time(0));
+    echttp_json_add_integer (context, root, "latest", housestate_current(LiveState));
     int top = echttp_json_add_object (context, root, "control");
     int container = echttp_json_add_object (context, top, "status");
 
@@ -174,6 +181,7 @@ static const char *orvibo_config (const char *method, const char *uri,
         if (error) {
             echttp_error (400, error);
         } else {
+            housestate_changed (LiveState);
             orvibo_plug_refresh();
             houselog_event ("SYSTEM", "CONFIG", "SAVE", "TO DEPOT %s", houseconfig_name());
             housedepositor_put ("config", houseconfig_name(), data, length);
@@ -239,7 +247,10 @@ int main (int argc, const char **argv) {
         houselog_trace
             (HOUSE_FAILURE, "CONFIG", "Cannot load configuration: %s", error);
     }
-    error = orvibo_plug_initialize (argc, argv);
+
+    LiveState = housestate_declare ("live");
+
+    error = orvibo_plug_initialize (argc, argv, LiveState);
     if (error) {
         houselog_trace
             (HOUSE_FAILURE, "PLUG", "Cannot initialize: %s", error);

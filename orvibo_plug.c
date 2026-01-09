@@ -82,6 +82,7 @@
 #include "echttp_json.h"
 #include "houselog.h"
 #include "houseconfig.h"
+#include "housestate.h"
 
 #include "orvibo_plug.h"
 
@@ -102,6 +103,8 @@ static int PlugsSpace = 0;
 
 static int OrviboSocket = -1;
 static struct sockaddr_in OrviboBroadcast;
+
+static int LiveState = 0;
 
 int orvibo_plug_count (void) {
     return PlugsCount;
@@ -256,6 +259,7 @@ int orvibo_plug_set (int point, int state, int pulse) {
         orvibo_plug_subscribe (point);
         orvibo_plug_control (point, state);
     }
+    housestate_changed (LiveState);
 }
 
 void orvibo_plug_periodic (time_t now) {
@@ -278,12 +282,14 @@ void orvibo_plug_periodic (time_t now) {
             houselog_event ("DEVICE", Plugs[i].name, "SILENT",
                             "MAC ADDRESS %s", Plugs[i].macaddress);
             Plugs[i].detected = 0;
+            housestate_changed (LiveState);
         }
 
         if (Plugs[i].deadline > 0 && now >= Plugs[i].deadline) {
             houselog_event ("DEVICE", Plugs[i].name, "RESET", "END OF PULSE");
             Plugs[i].commanded = 0;
             Plugs[i].deadline = 0;
+            housestate_changed (LiveState);
         }
         if (Plugs[i].status != Plugs[i].commanded) {
             if (Plugs[i].detected) {
@@ -446,11 +452,14 @@ static void orvibo_plug_receive (int fd, int mode) {
             houselog_event ("DEVICE", Plugs[plug].name, "ADDED",
                             "MAC ADDRESS %s", mac);
             Plugs[plug].detected = time(0); // Skip the "DETECTED" event.
+            housestate_changed (LiveState);
         }
         if (plug >= 0) {
-            if (!Plugs[plug].detected)
+            if (!Plugs[plug].detected) {
                 houselog_event ("DEVICE", Plugs[plug].name, "DETECTED",
                                 "MAC ADDRESS %s", mac);
+                housestate_changed (LiveState);
+            }
             Plugs[plug].detected = time(0);
 
             int status = (data[statepos] == 1);
@@ -460,6 +469,7 @@ static void orvibo_plug_receive (int fd, int mode) {
                                 Plugs[plug].status?"on":"off",
                                 status?"on":"off");
                 Plugs[plug].status = status;
+                housestate_changed (LiveState);
             }
 
             memcpy (&(Plugs[plug].ipaddress),
@@ -468,7 +478,8 @@ static void orvibo_plug_receive (int fd, int mode) {
     }
 }
 
-const char *orvibo_plug_initialize (int argc, const char **argv) {
+const char *orvibo_plug_initialize (int argc, const char **argv, int livestate) {
+    LiveState = livestate;
     orvibo_plug_socket ();
     echttp_listen (OrviboSocket, 1, orvibo_plug_receive, 0);
     return orvibo_plug_refresh ();
