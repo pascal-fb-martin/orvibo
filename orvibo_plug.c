@@ -328,11 +328,10 @@ const char *orvibo_plug_refresh (void) {
     Plugs = calloc(sizeof(struct PlugMap), PlugsSpace);
     if (!Plugs) return "no more memory";
 
+    int *list = calloc (PlugsCount, sizeof(int));
+    houseconfig_enumerate (plugs, list, PlugsCount);
     for (i = 0; i < PlugsCount; ++i) {
-        int plug;
-        char path[128];
-        snprintf (path, sizeof(path), "[%d]", i);
-        plug = houseconfig_object (plugs, path);
+        int plug = list[i];
         if (plug <= 0) continue;
         const char *name = houseconfig_string (plug, ".name");
         if (name) {
@@ -349,6 +348,8 @@ const char *orvibo_plug_refresh (void) {
         Plugs[i].commanded = 0;
         Plugs[i].deadline = 0;
     }
+    free (list);
+
     return 0;
 }
 
