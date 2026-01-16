@@ -22,6 +22,10 @@
  *
  * SYNOPSYS:
  *
+ * void orvibo_plug_initialize (int argc, const char **argv, int livestate);
+ *
+ *    Initialize the access to the Orvibo plugs.
+ *
  * const char *orvibo_plug_configure (int argc, const char **argv);
  *
  *    Retrieve the configuration and initialize access to the plugs.
@@ -349,6 +353,7 @@ const char *orvibo_plug_refresh (void) {
         Plugs[i].deadline = 0;
     }
     free (list);
+    housestate_changed (LiveState);
 
     return 0;
 }
@@ -479,10 +484,9 @@ static void orvibo_plug_receive (int fd, int mode) {
     }
 }
 
-const char *orvibo_plug_initialize (int argc, const char **argv, int livestate) {
+void orvibo_plug_initialize (int argc, const char **argv, int livestate) {
     LiveState = livestate;
     orvibo_plug_socket ();
     echttp_listen (OrviboSocket, 1, orvibo_plug_receive, 0);
-    return orvibo_plug_refresh ();
 }
 
