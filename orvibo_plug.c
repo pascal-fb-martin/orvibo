@@ -335,7 +335,7 @@ const char *orvibo_plug_refresh (void) {
     int *list = calloc (PlugsCount, sizeof(int));
     houseconfig_enumerate (plugs, list, PlugsCount);
     for (i = 0; i < PlugsCount; ++i) {
-        int plug = list[i];
+        int plug = houseconfig_object (list[i], 0);
         if (plug <= 0) continue;
         const char *name = houseconfig_string (plug, ".name");
         if (name) {
