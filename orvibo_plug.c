@@ -243,8 +243,8 @@ int orvibo_plug_set (int point, int state, int pulse) {
     if (point < 0 || point > PlugsCount) return 0;
 
     if (echttp_isdebug()) {
-        if (pulse) fprintf (stderr, "set %s to %s at %ld (pulse %ds)\n", Plugs[point].name, namedstate, time(0), pulse);
-        else       fprintf (stderr, "set %s to %s at %ld\n", Plugs[point].name, namedstate, time(0));
+        if (pulse) fprintf (stderr, "set %s to %s at %lld (pulse %ds)\n", Plugs[point].name, namedstate, (long long)time(0), pulse);
+        else       fprintf (stderr, "set %s to %s at %lld\n", Plugs[point].name, namedstate, (long long)time(0));
     }
 
     if (pulse > 0) {
