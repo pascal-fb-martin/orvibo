@@ -52,25 +52,6 @@ static int LiveState = 0;
 
 static char HostName[256];
 
-static void hc_help (const char *argv0) {
-
-    int i = 1;
-    const char *help;
-
-    printf ("%s [-h] [-debug] [-test]%s\n", argv0, echttp_help(0));
-
-    printf ("\nGeneral options:\n");
-    printf ("   -h:              print this help.\n");
-
-    printf ("\nHTTP options:\n");
-    help = echttp_help(i=1);
-    while (help) {
-        printf ("   %s\n", help);
-        help = echttp_help(++i);
-    }
-    exit (0);
-}
-
 static const char *orvibo_status (const char *method, const char *uri,
                                   const char *data, int length) {
 

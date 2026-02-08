@@ -42,7 +42,7 @@ clean:
 rebuild: clean all
 
 %.o: %.c
-	gcc -c -Os -o $@ $<
+	gcc -c -Os -Wall -o $@ $<
 
 orvibo: $(OBJS)
 	gcc -Os -o orvibo $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lmagic -lrt

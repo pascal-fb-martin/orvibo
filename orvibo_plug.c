@@ -264,6 +264,7 @@ int orvibo_plug_set (int point, int state, int pulse) {
         orvibo_plug_control (point, state);
     }
     housestate_changed (LiveState);
+    return 1;
 }
 
 void orvibo_plug_periodic (time_t now) {
@@ -309,8 +310,6 @@ void orvibo_plug_periodic (time_t now) {
 const char *orvibo_plug_refresh (void) {
 
     int i;
-    int plugs;
-
     for (i = 0; i < PlugsCount; ++i) {
         Plugs[i].name[0] = 0;
         Plugs[i].macaddress[0] = 0;
@@ -320,13 +319,14 @@ const char *orvibo_plug_refresh (void) {
     }
     PlugsCount = 0;
 
-    if (houseconfig_active()) {
-        plugs = houseconfig_array (0, ".orvibo.plugs");
-        if (plugs < 0) return "cannot find plugs array";
+    if (!houseconfig_active()) return 0;
 
-        PlugsCount = houseconfig_array_length (plugs);
-        if (echttp_isdebug()) fprintf (stderr, "found %d plugs\n", PlugsCount);
-    }
+    int plugs = houseconfig_array (0, ".orvibo.plugs");
+    if (plugs < 0) return "cannot find plugs array";
+
+    PlugsCount = houseconfig_array_length (plugs);
+    if (echttp_isdebug()) fprintf (stderr, "found %d plugs\n", PlugsCount);
+
     PlugsSpace = PlugsCount + 32;
 
     Plugs = calloc(sizeof(struct PlugMap), PlugsSpace);
@@ -425,7 +425,7 @@ static void orvibo_plug_receive (int fd, int mode) {
 
     unsigned char data[128];
     struct sockaddr_in addr;
-    int addrlen = sizeof(addr);
+    socklen_t addrlen = sizeof(addr);
 
     int size = recvfrom (OrviboSocket, data, sizeof(data), 0,
                          (struct sockaddr *)(&addr), &addrlen);

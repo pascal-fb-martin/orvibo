@@ -62,25 +62,8 @@ static void orvibo_socket (void) {
     printf ("UDP socket is ready.\n");
 }
 
-static unsigned char hex2bin(char data) {
-    if (data >= '0' && data <= '9')
-        return data - '0';
-    if (data >= 'a' && data <= 'f')
-        return data - 'a' + 10;
-    if (data >= 'A' && data <= 'F')
-        return data - 'A' + 10;
-    return 0;
-}
-
-static char bin2hex (unsigned char d) {
-    d &= 0x0f;
-    if (d >= 0 && d <= 9) return '0' + d;
-    if (d >= 10 && d <= 15) return ('a' - 10) + d;
-    return '0';
-}
-
 static void orvibo_send (const char *d, const char *private) {
-    struct sockaddr_in a;
+
     int sent = sendto (OrviboSocket, d, strlen(d), 0,
                        (struct sockaddr *)(&OrviboBroadcast),
                        sizeof(struct sockaddr_in));
@@ -104,7 +87,7 @@ static void orvibo_receive (void) {
 
     char data[128];
     struct sockaddr_in addr;
-    int addrlen = sizeof(addr);
+    socklen_t addrlen = sizeof(addr);
 
     int size = recvfrom (OrviboSocket, data, sizeof(data), 0,
                          (struct sockaddr *)(&addr), &addrlen);
