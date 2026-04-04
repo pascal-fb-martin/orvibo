@@ -75,7 +75,7 @@ static void orvibo_send (const char *d, const char *private) {
         printf ("Sending %s\n", d);
     else {
         char privacy[256];
-        strncpy (privacy, d, sizeof(privacy));
+        memccpy (privacy, d, 0, sizeof(privacy));
         char *p = strstr (privacy, private);
         int i = strlen(private);
         while (--i>=0) *(p++) = '*';
