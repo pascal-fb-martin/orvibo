@@ -339,12 +339,11 @@ const char *orvibo_plug_refresh (void) {
         if (plug <= 0) continue;
         const char *name = houseconfig_string (plug, ".name");
         if (name) {
-            strncpy (Plugs[i].name, name, sizeof(Plugs[i].name));
-            Plugs[i].name[sizeof(Plugs[i].name)-1] = 0;
+            memccpy (Plugs[i].name, name, 0, sizeof(Plugs[i].name));
         }
         const char *mac = houseconfig_string (plug, ".address");
         if (mac)
-            strncpy (Plugs[i].macaddress, mac, sizeof(Plugs[i].macaddress));
+            memccpy (Plugs[i].macaddress, mac, 0, sizeof(Plugs[i].macaddress));
         const char *desc = houseconfig_string (plug, ".description");
         if (desc)
             snprintf (Plugs[i].description, sizeof(Plugs[i].description), "%s", desc);
