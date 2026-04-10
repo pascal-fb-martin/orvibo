@@ -84,6 +84,8 @@
 
 #include "echttp.h"
 #include "echttp_json.h"
+#include "echttp_libc.h"
+
 #include "houselog.h"
 #include "houseconfig.h"
 #include "housestate.h"
@@ -339,14 +341,14 @@ const char *orvibo_plug_refresh (void) {
         if (plug <= 0) continue;
         const char *name = houseconfig_string (plug, ".name");
         if (name) {
-            memccpy (Plugs[i].name, name, 0, sizeof(Plugs[i].name));
+            strtcpy (Plugs[i].name, name, sizeof(Plugs[i].name));
         }
         const char *mac = houseconfig_string (plug, ".address");
         if (mac)
-            memccpy (Plugs[i].macaddress, mac, 0, sizeof(Plugs[i].macaddress));
+            strtcpy (Plugs[i].macaddress, mac, sizeof(Plugs[i].macaddress));
         const char *desc = houseconfig_string (plug, ".description");
         if (desc)
-            snprintf (Plugs[i].description, sizeof(Plugs[i].description), "%s", desc);
+            strtcpy (Plugs[i].description, desc, sizeof(Plugs[0].description));
         if (echttp_isdebug()) fprintf (stderr, "found plug %s, address %s\n", Plugs[i].name, Plugs[i].macaddress);
         Plugs[i].commanded = 0;
         Plugs[i].deadline = 0;

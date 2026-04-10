@@ -37,6 +37,8 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+#include "echttp_libc.h"
+
 static int OrviboSocket = -1;
 static struct sockaddr_in OrviboBroadcast;
 
@@ -75,7 +77,7 @@ static void orvibo_send (const char *d, const char *private) {
         printf ("Sending %s\n", d);
     else {
         char privacy[256];
-        memccpy (privacy, d, 0, sizeof(privacy));
+        strtcpy (privacy, d, sizeof(privacy));
         char *p = strstr (privacy, private);
         int i = strlen(private);
         while (--i>=0) *(p++) = '*';

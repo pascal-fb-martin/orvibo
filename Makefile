@@ -48,7 +48,7 @@ orvibo: $(OBJS)
 	gcc -Os -o orvibo $(OBJS) -lhouseportal -lechttp -lssl -lcrypto -lmagic -lrt
 
 orvibosetup: orvibosetup.o
-	gcc -Os -o orvibosetup orvibosetup.o
+	gcc -Os -o orvibosetup orvibosetup.o -lechttp
 
 # Distribution agnostic file installation -----------------------
 
